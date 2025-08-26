@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: notification-bridge-logs-pv
+  labels:
+    app: psmarket
+    component: notification-bridge
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data/notification_bridge/logs
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: notification-bridge-logs-pvc
+  labels:
+    app: psmarket
+    component: notification-bridge
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: notification-bridge-logs-pv
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-bridge
+  labels:
+    app: psmarket
+    component: notification-bridge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: psmarket
+      component: notification-bridge
+  template:
+    metadata:
+      labels:
+        app: psmarket
+        component: notification-bridge
+    spec:
+      containers:
+        - name: notification-bridge
+          image: notification_bridge:latest
+          envFrom:
+            - configMapRef:
+                name: notification-bridge-config
+          volumeMounts:
+            - name: logs
+              mountPath: /var/log/notification_bridge
+          # resources:
+          #   requests:
+          #     cpu: "100m"
+          #     memory: "128Mi"
+          #   limits:
+          #     cpu: "500m"
+          #     memory: "512Mi"
+      volumes:
+        - name: logs
+          persistentVolumeClaim:
+            claimName: notification-bridge-logs-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-bridge
+  labels:
+    app: psmarket
+    component: notification-bridge
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8007
+      targetPort: 8007
+  selector:
+    app: psmarket
+    component: notification-bridge

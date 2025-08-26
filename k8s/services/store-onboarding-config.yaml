@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: store-onboarding-config
+data:
+  SERVICE_NAME: store_onboarding
+  LOG_DIR: /var/log/store_onboarding_service

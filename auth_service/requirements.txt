@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sqlalchemy
+asyncpg
+alembic
+python-dotenv
+passlib[bcrypt]>=1.7.4
+bcrypt>=4.0.0
+pyjwt
+pydantic
+PyYAML
+httpx
+pytest
+email-validator

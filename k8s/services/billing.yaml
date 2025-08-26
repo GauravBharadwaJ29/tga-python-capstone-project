@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: billing-service-logs-pv
+  labels:
+    app: psmarket
+    component: billing
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data/billing/logs
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: billing-service-logs-pvc
+  labels:
+    app: psmarket
+    component: billing
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: billing-service-logs-pv
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: billing
+  labels:
+    app: psmarket
+    component: billing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: psmarket
+      component: billing
+  template:
+    metadata:
+      labels:
+        app: psmarket
+        component: billing
+    spec:
+      containers:
+        - name: billing
+          image: billing:latest
+          envFrom:
+            - configMapRef:
+                name: billing-config
+          ports:
+            - containerPort: 8005
+          volumeMounts:
+            - name: logs
+              mountPath: /var/log/billing_service
+          # resources:
+          #   requests:
+          #     cpu: "100m"
+          #     memory: "128Mi"
+          #   limits:
+          #     cpu: "500m"
+          #     memory: "512Mi"
+      volumes:
+        - name: logs
+          persistentVolumeClaim:
+            claimName: billing-service-logs-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: billing
+  labels:
+    app: psmarket
+    component: billing
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8005
+      targetPort: 8005
+  selector:
+    app: psmarket
+    component: billing

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: inventory-config
+data:
+  SERVICE_NAME: inventory
+  LOG_DIR: /var/log/inventory_service

@@ -1,0 +1,3 @@
+name,address,contact_email,contact_phone,status,onboarded_at
+Store A,123 Main St,storea@example.com,1234567890,active,2024-06-01T10:00:00
+Store B,456 Elm St,storeb@example.com,9876543210,active,2024-06-01T11:00:00

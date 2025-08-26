@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-ui
+  labels:
+    app: psmarket
+    component: kafka-ui
+    tier: gui
+  annotations:
+    description: "Kafka UI for managing Kafka topics"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: psmarket
+      component: kafka-ui
+  template:
+    metadata:
+      labels:
+        app: psmarket
+        component: kafka-ui
+    spec:
+      containers:
+        - name: kafka-ui
+          image: provectuslabs/kafka-ui:latest
+          env:
+            - name: KAFKA_CLUSTERS_0_NAME
+              value: "local"
+            - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
+              value: "kafka:9092"
+          ports:
+            - containerPort: 8080
+          # resources:
+          #   requests:
+          #     cpu: "50m"
+          #     memory: "128Mi"
+          #   limits:
+          #     cpu: "250m"
+          #     memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-ui
+  labels:
+    app: psmarket
+    component: kafka-ui
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30801  # Access via minikube:30801
+  selector:
+    app: psmarket
+    component: kafka-ui

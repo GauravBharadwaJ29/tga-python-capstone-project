@@ -1,0 +1,4 @@
+aiokafka
+httpx
+python-dotenv
+PyYAML

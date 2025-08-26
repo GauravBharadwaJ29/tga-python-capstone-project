@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: notification-service-logs-pv
+  labels:
+    app: psmarket
+    component: notification
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data/notification/logs
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: notification-service-logs-pvc
+  labels:
+    app: psmarket
+    component: notification
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: notification-service-logs-pv
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification
+  labels:
+    app: psmarket
+    component: notification
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: psmarket
+      component: notification
+  template:
+    metadata:
+      labels:
+        app: psmarket
+        component: notification
+    spec:
+      containers:
+        - name: notification
+          image: notification:latest
+          envFrom:
+            - configMapRef:
+                name: notification-config
+          ports:
+            - containerPort: 8007
+          volumeMounts:
+            - name: logs
+              mountPath: /var/log/notification
+          # resources:
+          #   requests:
+          #     cpu: "100m"
+          #     memory: "128Mi"
+          #   limits:
+          #     cpu: "500m"
+          #     memory: "512Mi"
+      volumes:
+        - name: logs
+          persistentVolumeClaim:
+            claimName: notification-service-logs-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification
+  labels:
+    app: psmarket
+    component: notification
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8007
+      targetPort: 8007
+  selector:
+    app: psmarket
+    component: notification

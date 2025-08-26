@@ -1,0 +1,12 @@
+[
+  {
+    "to": "user1@example.com",
+    "subject": "Order Confirmation",
+    "message": "Your order has been placed successfully."
+  },
+  {
+    "to": "user2@example.com",
+    "subject": "Delivery Update",
+    "message": "Your order is out for delivery."
+  }
+]

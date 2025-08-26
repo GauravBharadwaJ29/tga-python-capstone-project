@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+aioredis
+motor
+pydantic
+python-dotenv
+email-validator
+PyYAML
+pytest

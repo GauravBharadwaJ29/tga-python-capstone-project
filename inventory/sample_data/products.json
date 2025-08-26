@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Apple iPhone 15",
+    "description": "Latest iPhone model",
+    "price": 999.99,
+    "category": "Electronics",
+    "stock": 50,
+    "store_id": "store001"
+  },
+  {
+    "name": "Samsung Galaxy S24",
+    "description": "Flagship Android phone",
+    "price": 899.99,
+    "category": "Electronics",
+    "stock": 40,
+    "store_id": "store002"
+  }
+]

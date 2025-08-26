@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgadmin
+  labels:
+    app: psmarket
+    component: pgadmin
+    tier: gui
+  annotations:
+    description: "PgAdmin for Postgres administration"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: psmarket
+      component: pgadmin
+  template:
+    metadata:
+      labels:
+        app: psmarket
+        component: pgadmin
+    spec:
+      containers:
+        - name: pgadmin
+          image: dpage/pgadmin4
+          env:
+            - name: PGADMIN_DEFAULT_EMAIL
+              value: "admin@admin.com"
+            - name: PGADMIN_DEFAULT_PASSWORD
+              value: "admin"
+          ports:
+            - containerPort: 80
+          # resources:
+          #   requests:
+          #     cpu: "50m"
+          #     memory: "128Mi"
+          #   limits:
+          #     cpu: "250m"
+          #     memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgadmin
+  labels:
+    app: psmarket
+    component: pgadmin
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30803  # Access via minikube:30803
+  selector:
+    app: psmarket
+    component: pgadmin

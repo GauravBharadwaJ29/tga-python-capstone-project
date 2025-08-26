@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: notification-bridge-config
+data:
+  SERVICE_NAME: notification_bridge
+  LOG_DIR: /var/log/notification_bridge

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: delivery-config
+data:
+  SERVICE_NAME: delivery
+  LOG_DIR: /var/log/delivery_service

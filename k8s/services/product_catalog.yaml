@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: product-catalog-logs-pv
+  labels:
+    app: psmarket
+    component: product-catalog
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data/product_catalog/logs
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: product-catalog-logs-pvc
+  labels:
+    app: psmarket
+    component: product-catalog
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: product-catalog-logs-pv
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-catalog
+  labels:
+    app: psmarket
+    component: product-catalog
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: psmarket
+      component: product-catalog
+  template:
+    metadata:
+      labels:
+        app: psmarket
+        component: product-catalog
+    spec:
+      containers:
+        - name: product-catalog
+          image: product_catalog:latest
+          envFrom:
+            - configMapRef:
+                name: product-catalog-config
+          ports:
+            - containerPort: 8001
+          volumeMounts:
+            - name: logs
+              mountPath: /var/log/product_catalog_service
+          # resources:
+          #   requests:
+          #     cpu: "100m"
+          #     memory: "128Mi"
+          #   limits:
+          #     cpu: "500m"
+          #     memory: "512Mi"
+      volumes:
+        - name: logs
+          persistentVolumeClaim:
+            claimName: product-catalog-logs-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-catalog
+  labels:
+    app: psmarket
+    component: product-catalog
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8001
+      targetPort: 8001
+  selector:
+    app: psmarket
+    component: product-catalog

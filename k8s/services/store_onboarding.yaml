@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: store-onboarding-logs-pv
+  labels:
+    app: psmarket
+    component: store-onboarding
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data/store_onboarding/logs
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: store-onboarding-logs-pvc
+  labels:
+    app: psmarket
+    component: store-onboarding
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: store-onboarding-logs-pv
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: store-onboarding
+  labels:
+    app: psmarket
+    component: store-onboarding
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: psmarket
+      component: store-onboarding
+  template:
+    metadata:
+      labels:
+        app: psmarket
+        component: store-onboarding
+    spec:
+      containers:
+        - name: store-onboarding
+          image: store_onboarding:latest
+          envFrom:
+            - configMapRef:
+                name: store-onboarding-config
+          ports:
+            - containerPort: 8008
+          volumeMounts:
+            - name: logs
+              mountPath: /var/log/store_onboarding_service
+          # resources:
+          #   requests:
+          #     cpu: "100m"
+          #     memory: "128Mi"
+          #   limits:
+          #     cpu: "500m"
+          #     memory: "512Mi"
+      volumes:
+        - name: logs
+          persistentVolumeClaim:
+            claimName: store-onboarding-logs-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: store-onboarding
+  labels:
+    app: psmarket
+    component: store-onboarding
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8008
+      targetPort: 8008
+  selector:
+    app: psmarket
+    component: store-onboarding

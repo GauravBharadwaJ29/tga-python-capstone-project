@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+data:
+  SERVICE_NAME: api_gateway
+  LOG_DIR: /var/log/api_gateway

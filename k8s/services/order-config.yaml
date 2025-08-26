@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-config
+data:
+  SERVICE_NAME: order
+  LOG_DIR: /var/log/order_service

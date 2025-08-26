@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: order-service-logs-pv
+  labels:
+    app: psmarket
+    component: order
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data/order/logs
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: order-service-logs-pvc
+  labels:
+    app: psmarket
+    component: order
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: order-service-logs-pv
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order
+  labels:
+    app: psmarket
+    component: order
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: psmarket
+      component: order
+  template:
+    metadata:
+      labels:
+        app: psmarket
+        component: order
+    spec:
+      containers:
+        - name: order
+          image: order:latest
+          envFrom:
+            - configMapRef:
+                name: order-config
+          ports:
+            - containerPort: 8003
+          volumeMounts:
+            - name: logs
+              mountPath: /var/log/order_service
+          # resources:
+          #   requests:
+          #     cpu: "100m"
+          #     memory: "128Mi"
+          #   limits:
+          #     cpu: "500m"
+          #     memory: "512Mi"
+      volumes:
+        - name: logs
+          persistentVolumeClaim:
+            claimName: order-service-logs-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order
+  labels:
+    app: psmarket
+    component: order
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8003
+      targetPort: 8003
+  selector:
+    app: psmarket
+    component: order

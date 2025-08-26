@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-service-config
+data:
+  SERVICE_NAME: auth_service
+  LOG_DIR: /var/log/auth_service
+  # ...other non-sensitive env vars...

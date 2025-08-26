@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-commander
+  labels:
+    app: psmarket
+    component: redis-commander
+    tier: gui
+  annotations:
+    description: "Redis Commander for Redis administration"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: psmarket
+      component: redis-commander
+  template:
+    metadata:
+      labels:
+        app: psmarket
+        component: redis-commander
+    spec:
+      containers:
+        - name: redis-commander
+          image: rediscommander/redis-commander
+          env:
+            - name: REDIS_HOSTS
+              value: "local:redis:6379"
+          ports:
+            - containerPort: 8081
+          # resources:
+          #   requests:
+          #     cpu: "50m"
+          #     memory: "128Mi"
+          #   limits:
+          #     cpu: "250m"
+          #     memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-commander
+  labels:
+    app: psmarket
+    component: redis-commander
+spec:
+  type: NodePort
+  ports:
+    - port: 8081
+      targetPort: 8081
+      nodePort: 30804  # Access via minikube:30804
+  selector:
+    app: psmarket
+    component: redis-commander

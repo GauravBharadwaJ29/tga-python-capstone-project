@@ -1,0 +1,30 @@
+version: 1
+disable_existing_loggers: false
+
+formatters:
+  standard:    
+    format: '%(asctime)s - %(levelname)s - [${SERVICE_NAME}] - %(filename)s:%(lineno)d - %(message)s'
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: standard
+    stream: ext://sys.stdout
+
+  file:
+    class: logging.FileHandler
+    level: DEBUG
+    formatter: standard
+    filename: ${LOG_DIR}/${SERVICE_NAME}.log
+    encoding: utf8
+
+loggers:
+  ${SERVICE_NAME}:
+    level: DEBUG
+    handlers: [console, file]
+    propagate: false
+
+root:
+  level: WARNING
+  handlers: [console, file]
