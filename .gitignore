@@ -1,0 +1,10 @@
+# Logs
+**/logs/           # Ignores 'logs' directories anywhere in the project
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+
+code.md
