@@ -1,0 +1,39 @@
+name: Build and Deploy to Azure App Service
+
+on:
+  workflow_dispatch:
+    inputs:
+      service_name:
+        description: 'Service name to build and deploy'
+        required: true
+        default: 'auth_service'
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Login to Azure Container Registry
+        run: |
+          az acr login --name ${{ secrets.ACR_NAME }}
+
+      - name: Build and push Docker image
+        run: |
+          SERVICE=${{ github.event.inputs.service_name }}
+          echo "Building and pushing $SERVICE image"
+          docker build ./$SERVICE -t ${{ secrets.ACR_NAME }}.azurecr.io/$SERVICE:latest
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/$SERVICE:latest
+
+      - name: Deploy to Azure Web App
+        run: |
+          SERVICE=${{ github.event.inputs.service_name }}
+          az webapp config container set --name $SERVICE-app --resource-group psmarket-rg --docker-custom-image-name ${{ secrets.ACR_NAME }}.azurecr.io/$SERVICE:latest
+          az webapp restart --name $SERVICE-app --resource-group psmarket-rg
