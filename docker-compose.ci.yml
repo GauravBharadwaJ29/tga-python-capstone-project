@@ -1,0 +1,171 @@
+version: '3.8'
+services:
+
+  # Microservices
+  auth_service:
+    build: ./auth_service
+    env_file: ./auth_service/.env
+    ports:
+      - "8009:8009"
+    volumes:
+      - auth_service_logs:/var/log/auth_service
+
+  product_catalog:
+    build: ./product_catalog
+    env_file: ./product_catalog/.env
+    ports:
+      - "8001:8001"
+    volumes:
+      - product_catalog_logs:/var/log/product_catalog
+
+  inventory:
+    build: ./inventory
+    env_file: ./inventory/.env
+    ports:
+      - "8002:8002"
+    volumes:
+      - inventory_service_logs:/var/log/inventory_service
+
+  order:
+    build: ./order
+    env_file: ./order/.env
+    ports:
+      - "8003:8003"
+    volumes:
+      - order_service_logs:/var/log/order_service
+
+  payment:
+    build: ./payment
+    env_file: ./payment/.env
+    ports:
+      - "8004:8004"
+    volumes:
+      - payment_service_logs:/var/log/payment_service
+
+  billing:
+    build: ./billing
+    env_file: ./billing/.env
+    ports:
+      - "8005:8005"
+    volumes:
+      - billing_service_logs:/var/log/billing_service
+
+  delivery:
+    build: ./delivery
+    env_file: ./delivery/.env
+    ports:
+      - "8006:8006"
+    volumes:
+      - delivery_service_logs:/var/log/delivery_service
+
+  notification:
+    build: ./notification
+    env_file: ./notification/.env
+    ports:
+      - "8007:8007"
+    volumes:
+      - notification_service_logs:/var/log/notification_service
+
+  notification_bridge:
+    build: ./notification_bridge
+    env_file: ./notification_bridge/.env
+    volumes:
+      - notification_bridge_logs:/var/log/notification_bridge
+
+
+  store_onboarding:
+    build: ./store_onboarding
+    env_file: ./store_onboarding/.env
+    ports:
+      - "8008:8008"
+    volumes:
+      - store_onboarding_service_logs:/var/log/store_onboarding_service
+
+  api_gateway:
+    build: ./api_gateway
+    env_file: ./api_gateway/.env
+    depends_on:
+      - product_catalog
+      - inventory
+      - order
+      - payment
+      - billing
+      - delivery
+      - notification
+      - store_onboarding
+    ports:
+      - "8080:8080"
+    volumes:
+      - api_gateway_logs:/var/log/api_gateway
+
+volumes:
+  order_service_logs:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./logs/order/logs
+      o: bind
+  product_catalog_logs:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./logs/product_catalog/logs
+      o: bind
+  inventory_service_logs:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./logs/inventory/logs
+      o: bind
+  payment_service_logs:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./logs/payment/logs
+      o: bind
+  billing_service_logs:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./logs/billing/logs
+      o: bind
+  delivery_service_logs:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./logs/delivery/logs
+      o: bind
+  notification_service_logs:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./logs/notification/logs
+      o: bind
+  store_onboarding_service_logs:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./logs/store_onboarding/logs
+      o: bind
+  api_gateway_logs:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./logs/api_gateway/logs
+      o: bind
+  auth_service_logs:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./logs/auth_service/logs
+      o: bind
+
+  notification_bridge_logs:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./logs/notification_bridge/logs
+      o: bind
+
+  
+  

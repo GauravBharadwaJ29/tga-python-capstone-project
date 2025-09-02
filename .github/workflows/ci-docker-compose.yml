@@ -137,16 +137,7 @@ jobs:
       working-directory: ./ 
       run: |
         # Start only essential services for CI to save resources
-        docker compose up -d \
-          --scale kafka-ui=0 \
-          --scale mongo-express=0 \
-          --scale pgadmin=0 \
-          --scale redis-commander=0 \
-          --scale prometheus=0 \
-          --scale grafana=0 \
-          --scale cadvisor=0 \
-          --scale loki=0 \
-          --scale promtail=0
+        docker compose -f docker-compose.ci.yml up -d
 
     - name: Make wait-for-services.sh executable
       run: chmod +x ./scripts/wait-for-services.sh
