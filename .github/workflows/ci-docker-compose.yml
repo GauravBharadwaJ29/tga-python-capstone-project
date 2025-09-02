@@ -51,20 +51,30 @@ jobs:
         options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
                       
       kafka:
-        image: docker.redpanda.com/redpandadata/redpanda:latest
-        env:
-          REDPANDA_EMPTY_SEED_START: "true"
-          REDPANDA_ENABLE_USAGE_STATS: "false"
-          # Disable ALL persistence to avoid permission issues
-          REDPANDA_ENABLE_PERSISTENCE: "false"
+        image: confluentinc/cp-kafka:7.6.0  # Use the same image as your local setup
+        environment:
+          KAFKA_CLUSTER_ID: "VJ7gkKpd-kqlYxyp4xx8zw"  # Keep your existing cluster ID
+          CLUSTER_ID: "VJ7gkKpd-kqlYxyp4xx8zw"
+          KAFKA_NODE_ID: 1
+          KAFKA_PROCESS_ROLES: broker,controller
+          KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+          KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,PLAINTEXT_HOST://0.0.0.0:29092
+          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+          KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+          KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+          KAFKA_LOG_DIRS: /tmp/kafka-data  # Use a temporary directory inside the container
+          KAFKA_LOG_FLUSH_INTERVAL_MESSAGES: 1  # Optional: reduce flush intervals for CI
+          KAFKA_LOG_FLUSH_INTERVAL_MS: 1000     # Optional: for faster recovery
         ports:
-          - 9092:9092
-        # Use a simple port check, no volume mounts
+          - "9092:9092"
+        # NO VOLUMES MOUNTED - this avoids permission issues
         options: >-
-          --health-cmd "timeout 5 bash -c 'echo | nc -w 1 localhost 9092'"
+          --health-cmd "nc -z localhost 9092 || exit 1"
           --health-interval 10s
-          --health-timeout 5s
-          --health-retries 15
+          --health-timeout 10s
+          --health-retries 20  # Increased retries for slower startup in CI
 
     steps:
     - name: Checkout repository
