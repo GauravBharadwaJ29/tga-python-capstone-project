@@ -57,3 +57,10 @@ jobs:
     - name: Tear down Docker Compose services
       if: always()
       run: docker compose down
+
+    - name: Cleanup workspace - logs and temp files
+      if: always()
+      run: |
+        echo "Cleaning up logs and temporary files..."
+        rm -rf ./logs
+        rm -rf ./temp || true      
