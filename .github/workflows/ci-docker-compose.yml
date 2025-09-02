@@ -52,7 +52,7 @@ jobs:
                 
       kafka:
         image: docker.redpanda.com/redpandadata/redpanda:latest
-        command:
+        env:
           - redpanda
           - start
           - --smp
