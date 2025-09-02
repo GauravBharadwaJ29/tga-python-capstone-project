@@ -47,6 +47,9 @@ jobs:
     - name: Start Docker Compose services
       run: docker compose up -d
 
+    - name: Make wait-for-services.sh executable
+      run: chmod +x ./scripts/wait-for-services.sh
+
     - name: Wait for services to be healthy
       run: ./scripts/wait-for-services.sh
 
