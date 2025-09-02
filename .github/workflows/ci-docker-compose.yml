@@ -128,6 +128,14 @@ jobs:
         mkdir -p ./logs/store_onboarding/logs
         mkdir -p ./logs/api_gateway/logs
         
+
+    - name: Check working directory
+      run: |
+        pwd
+        ls -la
+        ls -la docker-compose.yml || echo "No docker-compose.yml in root"
+        find . -name "docker-compose.yml" -o -name "docker-compose.yaml" | head -5
+
     - name: Start Docker Compose services (essential only)
       working-directory: ./ 
       run: |
@@ -174,9 +182,16 @@ jobs:
         exit 1        
 
     - name: Tear down Docker Compose services
-      working-directory: ./       
       if: always()
-      run: docker compose down
+      run: |
+        # Try to find and use the compose file explicitly
+        if [ -f "docker-compose.yml" ]; then
+          docker compose -f docker-compose.yml down
+        elif [ -f "docker-compose.yaml" ]; then
+          docker compose -f docker-compose.yaml down
+        else
+          echo "No docker-compose file found, skipping down command"
+        fi
 
     - name: Cleanup workspace - logs and temp files
       if: always()
