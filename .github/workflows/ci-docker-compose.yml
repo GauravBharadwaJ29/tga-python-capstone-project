@@ -35,9 +35,9 @@ jobs:
           - 27017:27017
         options: >-
           --health-cmd "mongo --eval 'db.runCommand({ ping: 1 })' --quiet"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
+          --health-interval 15s
+          --health-timeout 10s
+          --health-retries 20
 
       redis:
         image: redis:7
