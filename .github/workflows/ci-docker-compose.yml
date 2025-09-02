@@ -26,21 +26,21 @@ jobs:
     #     password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build Docker images
-      run: docker-compose build
+      run: docker compose build
 
     # - name: Push Docker images
-    #   run: docker-compose push
+    #   run: docker compose push
 
     - name: Start Docker Compose services
-      run: docker-compose up -d
+      run: docker compose up -d
 
     - name: Wait for services to be healthy
       run: ./scripts/wait-for-services.sh
 
     - name: Run tests (conditional)
       if: ${{ github.event.inputs.run_tests == 'true' }}
-      run: docker-compose exec auth_service pytest ./test || echo "Tests failed but continuing."
+      run: docker compose exec auth_service pytest ./test || echo "Tests failed but continuing."
 
     - name: Tear down Docker Compose services
       if: always()
-      run: docker-compose down
+      run: docker compose down
