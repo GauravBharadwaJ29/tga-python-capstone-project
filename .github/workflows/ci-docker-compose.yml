@@ -51,30 +51,26 @@ jobs:
         options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
                       
       kafka:
-        image: confluentinc/cp-kafka:7.6.0  
+        image: confluentinc/cp-kafka:7.6.0
         env:
-          KAFKA_CLUSTER_ID: "VJ7gkKpd-kqlYxyp4xx8zw"  
-          CLUSTER_ID: "VJ7gkKpd-kqlYxyp4xx8zw"
+          KAFKA_CLUSTER_ID: "VJ7gkKpd-kqlYxyp4xx8zw"
           KAFKA_NODE_ID: 1
           KAFKA_PROCESS_ROLES: broker,controller
           KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
-          KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,PLAINTEXT_HOST://0.0.0.0:29092
-          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
-          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+          KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
           KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
           KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
           KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-          KAFKA_LOG_DIRS: /tmp/kafka-data  
-          KAFKA_LOG_FLUSH_INTERVAL_MESSAGES: 1 
-          KAFKA_LOG_FLUSH_INTERVAL_MS: 1000    
+          KAFKA_LOG_DIRS: /tmp/kafka-data
         ports:
           - "9092:9092"
-        # NO VOLUMES MOUNTED - this avoids permission issues
         options: >-
           --health-cmd "nc -z localhost 9092 || exit 1"
           --health-interval 10s
           --health-timeout 10s
-          --health-retries 20  I
+          --health-retries 20
 
     steps:
     - name: Checkout repository
