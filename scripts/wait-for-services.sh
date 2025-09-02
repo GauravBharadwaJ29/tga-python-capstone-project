@@ -27,21 +27,19 @@ wait_for_service() {
 }
 
 # Function to check Kafka specifically
+# Function to check Kafka specifically
 wait_for_kafka() {
   local host=$1
   local port=$2
-  local max_attempts=30
+  local max_attempts=40  # Increased from 30 to 40
   local attempt=1
 
   echo "Waiting for Kafka at $host:$port..."
   while [ $attempt -le $max_attempts ]; do
-    # First check if port is open
-    if nc -z $host $port; then
-      # Then check if Kafka is actually responsive
-      if kafkacat -b $host:$port -L 2>/dev/null; then
-        echo "Kafka is ready!"
-        return 0
-      fi
+    # Use kafkacat to list brokers, which checks if Kafka is truly ready
+    if kafkacat -b $host:$port -L 2>/dev/null; then
+      echo "Kafka is ready!"
+      return 0
     fi
     echo "Attempt $attempt/$max_attempts: Kafka not ready. Retrying in 2 seconds..."
     sleep 2
@@ -77,6 +75,9 @@ wait_for_postgres() {
 wait_for_postgres localhost 5432 PostgreSQL
 wait_for_service localhost 27017 MongoDB
 wait_for_service localhost 6379 Redis
+
+echo "Waiting a moment for services to begin starting..."
+sleep 10
 wait_for_kafka localhost 9092 Kafka
 
 echo "All services are up and running!"
