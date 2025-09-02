@@ -52,7 +52,7 @@ jobs:
                       
       kafka:
         image: confluentinc/cp-kafka:7.6.0  # Use the same image as your local setup
-        environment:
+        env:
           KAFKA_CLUSTER_ID: "VJ7gkKpd-kqlYxyp4xx8zw"  # Keep your existing cluster ID
           CLUSTER_ID: "VJ7gkKpd-kqlYxyp4xx8zw"
           KAFKA_NODE_ID: 1
