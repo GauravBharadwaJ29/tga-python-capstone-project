@@ -52,7 +52,7 @@ jobs:
                       
       kafka:
         image: docker.redpanda.com/redpandadata/redpanda:latest
-        environment:
+        env:
           REDPANDA_EMPTY_SEED_START: "true"
           REDPANDA_ENABLE_USAGE_STATS: "false"
           # Disable ALL persistence to avoid permission issues
