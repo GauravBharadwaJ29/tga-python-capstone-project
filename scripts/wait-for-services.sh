@@ -2,7 +2,7 @@
 set -e
 
 # Install required utilities
-sudo apt-get update && sudo apt-get install -y postgresql-client netcat kafkacat
+sudo apt-get update && sudo apt-get install -y postgresql-client netcat-openbsd kafkacat
 
 # Function to check service availability
 wait_for_service() {
