@@ -51,9 +51,9 @@ jobs:
         options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
                       
       kafka:
-        image: confluentinc/cp-kafka:7.6.0  # Use the same image as your local setup
+        image: confluentinc/cp-kafka:7.6.0  
         env:
-          KAFKA_CLUSTER_ID: "VJ7gkKpd-kqlYxyp4xx8zw"  # Keep your existing cluster ID
+          KAFKA_CLUSTER_ID: "VJ7gkKpd-kqlYxyp4xx8zw"  
           CLUSTER_ID: "VJ7gkKpd-kqlYxyp4xx8zw"
           KAFKA_NODE_ID: 1
           KAFKA_PROCESS_ROLES: broker,controller
@@ -64,9 +64,9 @@ jobs:
           KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
           KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
           KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-          KAFKA_LOG_DIRS: /tmp/kafka-data  # Use a temporary directory inside the container
-          KAFKA_LOG_FLUSH_INTERVAL_MESSAGES: 1  # Optional: reduce flush intervals for CI
-          KAFKA_LOG_FLUSH_INTERVAL_MS: 1000     # Optional: for faster recovery
+          KAFKA_LOG_DIRS: /tmp/kafka-data  
+          KAFKA_LOG_FLUSH_INTERVAL_MESSAGES: 1 
+          KAFKA_LOG_FLUSH_INTERVAL_MS: 1000    
         ports:
           - "9092:9092"
         # NO VOLUMES MOUNTED - this avoids permission issues
@@ -74,7 +74,7 @@ jobs:
           --health-cmd "nc -z localhost 9092 || exit 1"
           --health-interval 10s
           --health-timeout 10s
-          --health-retries 20  # Increased retries for slower startup in CI
+          --health-retries 20  I
 
     steps:
     - name: Checkout repository
