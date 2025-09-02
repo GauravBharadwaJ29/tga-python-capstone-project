@@ -2,7 +2,7 @@
 set -e
 
 # Install required utilities
-apt-get update && apt-get install -y postgresql-client netcat-openbsd
+sudo apt-get update && sudo apt-get install -y postgresql-client netcat
 
 # Function to check service availability
 wait_for_service() {
