@@ -30,7 +30,6 @@ wait_for_service() {
 wait_for_service localhost 5432 PostgreSQL
 wait_for_service localhost 27017 MongoDB
 wait_for_service localhost 6379 Redis
-wait_for_service localhost 2181 Zookeeper
 wait_for_service localhost 9092 Kafka
 
 echo "All services are up and running!"

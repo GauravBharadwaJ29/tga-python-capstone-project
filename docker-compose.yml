@@ -369,7 +369,8 @@ volumes:
       type: none
       device: ./logs/notification_bridge/logs
       o: bind
-  prometheus_data:    
+  prometheus_data: 
+  loki_data:   
 
-  volumes:
-  loki_data:
+  
+  

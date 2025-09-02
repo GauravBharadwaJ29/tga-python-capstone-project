@@ -13,7 +13,7 @@ on:
 concurrency:
   group: ci-build-deploy-test
   cancel-in-progress: true
-  
+
 jobs:
   build-deploy-test:
     runs-on: ubuntu-latest
@@ -53,22 +53,28 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+          
       kafka:
         image: confluentinc/cp-kafka:7.6.0
+        env:
+          KAFKA_CLUSTER_ID: "VJ7gkKpd-kqlYxyp4xx8zw"
+          KAFKA_NODE_ID: 1
+          KAFKA_PROCESS_ROLES: broker,controller
+          KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+          KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,PLAINTEXT_HOST://0.0.0.0:29092
+          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+          KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+          KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+          KAFKA_LOG_DIRS: /var/lib/kafka/data
         ports:
           - 9092:9092
         options: >-
-          -e KAFKA_CLUSTER_ID=VJ7gkKpd-kqlYxyp4xx8zw
-          -e KAFKA_NODE_ID=1
-          -e KAFKA_PROCESS_ROLES=broker,controller
-          -e KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
-          -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-          -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
-          -e KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
-          -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
-          -e KAFKA_LOG_DIRS=/var/lib/kafka/data
-        volumes:
-          - kafka_data:/var/lib/kafka/data
+          --health-cmd "kafka-topics --bootstrap-server localhost:9092 --list"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
 
 
 
@@ -81,6 +87,12 @@ jobs:
     #   with:
     #     username: ${{ secrets.DOCKERHUB_USERNAME }}
     #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Install kafkacat for Kafka health checks
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y kafkacat
+
     - name: Diagnostic - Check port 27017 usage and running containers
       run: |
         echo "Listening TCP ports:"
@@ -98,10 +110,8 @@ jobs:
     - name: Cleanup Docker environment
       run: |
         echo "Prune unused containers, networks, volumes, images"
-        docker container prune -f
-        docker network prune -f
-        docker volume prune -f
-        docker image prune -f
+        docker system prune -af
+
     - name: Build Docker images
       working-directory: ./
       run: docker compose build
@@ -134,7 +144,22 @@ jobs:
 
     - name: Run tests (conditional)
       if: ${{ github.event.inputs.run_tests == 'true' }}
-      run: docker compose exec auth_service pytest ./test || echo "Tests failed but continuing."
+      run: |
+        # Run tests and capture exit code
+        docker compose exec auth_service pytest ./test
+        TEST_EXIT_CODE=$?
+        
+        # Even if tests fail, we want to continue to tear down
+        if [ $TEST_EXIT_CODE -ne 0 ]; then
+          echo "Tests failed with exit code $TEST_EXIT_CODE"
+          echo "TEST_FAILURE=true" >> $GITHUB_ENV
+        fi
+
+    - name: Check test results
+      if: ${{ github.event.inputs.run_tests == 'true' && env.TEST_FAILURE == 'true' }}
+      run: |
+        echo "Tests failed - failing workflow"
+        exit 1        
 
     - name: Tear down Docker Compose services
       working-directory: ./       
@@ -144,10 +169,7 @@ jobs:
     - name: Cleanup workspace - logs and temp files
       if: always()
       run: |
-        docker container prune -f
-        docker network prune -f
-        docker volume prune -f
-        docker image prune -f      
+        docker system prune -af     
         echo "Cleaning up logs and temporary files..."
         rm -rf ./logs
         rm -rf ./temp || true      
