@@ -31,6 +31,7 @@ jobs:
 
       mongo:
         image: mongo:6
+        command: ["mongod", "--bind_ip_all"]        
         ports:
           - 27017:27017
         options: >-
@@ -65,6 +66,7 @@ jobs:
     #     password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build Docker images
+      working-directory: ./
       run: docker compose build
 
     # - name: Push Docker images
@@ -84,6 +86,7 @@ jobs:
         mkdir -p ./logs/api_gateway/logs
         
     - name: Start Docker Compose services
+      working-directory: ./    
       run: docker compose up -d
 
     - name: Make wait-for-services.sh executable
@@ -97,12 +100,17 @@ jobs:
       run: docker compose exec auth_service pytest ./test || echo "Tests failed but continuing."
 
     - name: Tear down Docker Compose services
+      working-directory: ./       
       if: always()
       run: docker compose down
 
     - name: Cleanup workspace - logs and temp files
       if: always()
       run: |
+        docker container prune -f
+        docker network prune -f
+        docker volume prune -f
+        docker image prune -f      
         echo "Cleaning up logs and temporary files..."
         rm -rf ./logs
         rm -rf ./temp || true      
