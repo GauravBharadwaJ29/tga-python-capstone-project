@@ -52,18 +52,19 @@ jobs:
                       
       kafka:
         image: docker.redpanda.com/redpandadata/redpanda:latest
-        env:
+        environment:
           REDPANDA_EMPTY_SEED_START: "true"
           REDPANDA_ENABLE_USAGE_STATS: "false"
-          REDPANDA_DATA_DIRECTORY: "/tmp/redpanda-data"  
+          # Disable ALL persistence to avoid permission issues
+          REDPANDA_ENABLE_PERSISTENCE: "false"
         ports:
           - 9092:9092
+        # Use a simple port check, no volume mounts
         options: >-
-          --health-cmd "nc -z localhost 9092 || exit 1"
+          --health-cmd "timeout 5 bash -c 'echo | nc -w 1 localhost 9092'"
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 10
-          -v /tmp/redpanda-data:/tmp/redpanda-data  
+          --health-retries 15
 
     steps:
     - name: Checkout repository
