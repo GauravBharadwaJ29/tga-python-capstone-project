@@ -2,7 +2,7 @@
 set -e
 
 # Install required utilities
-sudo apt-get update && sudo apt-get install -y postgresql-client netcat
+sudo apt-get update && sudo apt-get install -y postgresql-client netcat kafkacat
 
 # Function to check service availability
 wait_for_service() {
@@ -26,10 +26,57 @@ wait_for_service() {
   exit 1
 }
 
+# Function to check Kafka specifically
+wait_for_kafka() {
+  local host=$1
+  local port=$2
+  local max_attempts=30
+  local attempt=1
+
+  echo "Waiting for Kafka at $host:$port..."
+  while [ $attempt -le $max_attempts ]; do
+    # First check if port is open
+    if nc -z $host $port; then
+      # Then check if Kafka is actually responsive
+      if kafkacat -b $host:$port -L 2>/dev/null; then
+        echo "Kafka is ready!"
+        return 0
+      fi
+    fi
+    echo "Attempt $attempt/$max_attempts: Kafka not ready. Retrying in 2 seconds..."
+    sleep 2
+    attempt=$((attempt + 1))
+  done
+  echo "Error: Kafka failed to become ready in time."
+  exit 1
+}
+
+
+# Function to check PostgreSQL specifically
+wait_for_postgres() {
+  local host=$1
+  local port=$2
+  local max_attempts=30
+  local attempt=1
+
+  echo "Waiting for PostgreSQL at $host:$port..."
+  while [ $attempt -le $max_attempts ]; do
+    if pg_isready -h $host -p $port -U postgres; then
+      echo "PostgreSQL is ready!"
+      return 0
+    fi
+    echo "Attempt $attempt/$max_attempts: PostgreSQL not ready. Retrying in 2 seconds..."
+    sleep 2
+    attempt=$((attempt + 1))
+  done
+  echo "Error: PostgreSQL failed to become ready in time."
+  exit 1
+}
+
 # Check services
-wait_for_service localhost 5432 PostgreSQL
+wait_for_postgres localhost 5432 PostgreSQL
 wait_for_service localhost 27017 MongoDB
 wait_for_service localhost 6379 Redis
-wait_for_service localhost 9092 Kafka
+wait_for_kafka localhost 9092 Kafka
 
 echo "All services are up and running!"

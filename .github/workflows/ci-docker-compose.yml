@@ -71,7 +71,7 @@ jobs:
         ports:
           - 9092:9092
         options: >-
-          --health-cmd "kafka-topics --bootstrap-server localhost:9092 --list"
+          --health-cmd "nc -z localhost 9092 || exit 1"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
@@ -88,20 +88,16 @@ jobs:
     #     username: ${{ secrets.DOCKERHUB_USERNAME }}
     #     password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Install kafkacat for Kafka health checks
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y kafkacat
 
     - name: Diagnostic - Check port 27017 usage and running containers
       run: |
         echo "Listening TCP ports:"
-        sudo netstat -tulpn | grep LISTEN || true
+        netstat -tulpn | grep LISTEN || true
 
         echo "Check ports 5432, 27017, 6379, 9092 specifically:"
         for port in 5432 27017 6379 9092; do
           echo "Port $port usage:"
-          sudo lsof -i :$port || echo "Port $port not in use"
+          lsof -i :$port || echo "Port $port not in use"
         done
 
         echo "List all running Docker containers:"
@@ -132,15 +128,31 @@ jobs:
         mkdir -p ./logs/store_onboarding/logs
         mkdir -p ./logs/api_gateway/logs
         
-    - name: Start Docker Compose services
-      working-directory: ./    
-      run: docker compose up -d
+    - name: Start Docker Compose services (essential only)
+      working-directory: ./ 
+      run: |
+        # Start only essential services for CI to save resources
+        docker compose up -d \
+          --scale kafka-ui=0 \
+          --scale mongo-express=0 \
+          --scale pgadmin=0 \
+          --scale redis-commander=0 \
+          --scale prometheus=0 \
+          --scale grafana=0 \
+          --scale cadvisor=0 \
+          --scale loki=0 \
+          --scale promtail=0
 
     - name: Make wait-for-services.sh executable
       run: chmod +x ./scripts/wait-for-services.sh
 
     - name: Wait for services to be healthy
       run: ./scripts/wait-for-services.sh
+
+    - name: Wait for application services to be ready
+      run: |
+        # Additional wait for microservices to start after dependencies are ready
+        sleep 15      
 
     - name: Run tests (conditional)
       if: ${{ github.event.inputs.run_tests == 'true' }}
