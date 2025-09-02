@@ -1,42 +1,36 @@
 #!/bin/bash
 set -e
 
-# Install necessary utilities for health checks if missing
-if ! command -v pg_isready &> /dev/null
-then
-    echo "pg_isready could not be found, installing postgresql-client ..."
-    sudo apt-get update && sudo apt-get install -y postgresql-client
-fi
+# Install required utilities
+apt-get update && apt-get install -y postgresql-client netcat-openbsd
 
-if ! command -v nc &> /dev/null
-then
-    echo "nc (netcat) could not be found, installing netcat ..."
-    sudo apt-get update && sudo apt-get install -y netcat
-fi
+# Function to check service availability
+wait_for_service() {
+  local host=$1
+  local port=$2
+  local service=$3
+  local max_attempts=30
+  local attempt=1
 
-echo "Waiting for PostgreSQL to be ready at postgres:5432"
-until pg_isready -h postgres -p 5432; do
-  echo "Waiting for postgres..."
-  sleep 2
-done
+  echo "Waiting for $service at $host:$port..."
+  while [ $attempt -le $max_attempts ]; do
+    if nc -z $host $port; then
+      echo "$service is ready!"
+      return 0
+    fi
+    echo "Attempt $attempt/$max_attempts: $service not ready. Retrying in 2 seconds..."
+    sleep 2
+    attempt=$((attempt + 1))
+  done
+  echo "Error: $service failed to become ready in time."
+  exit 1
+}
 
-echo "Waiting for MongoDB to be ready at mongo:27017"
-until nc -z mongo 27017; do
-  echo "Waiting for mongo..."
-  sleep 2
-done
+# Check services
+wait_for_service localhost 5432 PostgreSQL
+wait_for_service localhost 27017 MongoDB
+wait_for_service localhost 6379 Redis
+wait_for_service localhost 2181 Zookeeper
+wait_for_service localhost 9092 Kafka
 
-echo "Waiting for Redis to be ready at redis:6379"
-until nc -z redis 6379; do
-  echo "Waiting for redis..."
-  sleep 2
-done
-
-echo "Waiting for Kafka to be ready at kafka:9092"
-until nc -z kafka 9092; do
-  echo "Waiting for kafka..."
-  sleep 2
-done
-
-echo "All services are up!"
-
+echo "All services are up and running!"
