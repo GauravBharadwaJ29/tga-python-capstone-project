@@ -52,6 +52,9 @@ jobs:
                 
       kafka:
         image: docker.redpanda.com/redpandadata/redpanda:latest
+        env:
+          REDPANDA_EMPTY_SEED_START: "true"
+          REDPANDA_ENABLE_USAGE_STATS: "false"
         ports:
           - 9092:9092
         options: >-
@@ -59,6 +62,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
+          --tmpfs /var/lib/redpanda/data
 
     steps:
     - name: Checkout repository
