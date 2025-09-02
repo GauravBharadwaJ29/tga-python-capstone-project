@@ -52,15 +52,20 @@ jobs:
                 
       kafka:
         image: docker.redpanda.com/redpandadata/redpanda:latest
+        env:
+          REDPANDA_SMP: "1"
+          REDPANDA_RESERVE_MEMORY: "0M"
+          REDPANDA_OVERPROVISIONED: "true"
+          REDPANDA_NODE_ID: "0"
+          REDPANDA_KAFKA_ADDR: "PLAINTEXT://0.0.0.0:9092"
+          REDPANDA_ADVERTISE_KAFKA_ADDR: "PLAINTEXT://localhost:9092"
+        ports:
+          - 9092:9092
         options: >-
           --health-cmd "nc -z localhost 9092 || exit 1"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
-          --entrypoint "redpanda"
-        command: ["start", "--smp", "1", "--reserve-memory", "0M", "--overprovisioned", "--node-id", "0", "--kafka-addr", "PLAINTEXT://0.0.0.0:9092", "--advertise-kafka-addr", "PLAINTEXT://localhost:9092"]
-        ports:
-          - 9092:9092
 
     steps:
     - name: Checkout repository
