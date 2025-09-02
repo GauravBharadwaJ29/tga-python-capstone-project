@@ -10,7 +10,10 @@ on:
         description: 'Run tests? Set false to skip tests'
         required: false
         default: 'false'  # tests disabled by default
-
+concurrency:
+  group: ci-build-deploy-test
+  cancel-in-progress: true
+  
 jobs:
   build-deploy-test:
     runs-on: ubuntu-latest
@@ -82,7 +85,7 @@ jobs:
       run: |
         echo "Listening TCP ports:"
         sudo netstat -tulpn | grep LISTEN || true
-        
+
         echo "Check ports 5432, 27017, 6379, 9092 specifically:"
         for port in 5432 27017 6379 9092; do
           echo "Port $port usage:"
