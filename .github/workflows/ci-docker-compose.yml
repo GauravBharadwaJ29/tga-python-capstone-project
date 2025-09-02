@@ -32,17 +32,17 @@ jobs:
     #   run: docker compose push
     - name: Prepare log directories for volume mounts
       run: |
-        mkdir -p ./logs/auth_service
-        mkdir -p ./logs/product_catalog
-        mkdir -p ./logs/inventory
+        mkdir -p ./logs/auth_service/logs
+        mkdir -p ./logs/product_catalog/logs
+        mkdir -p ./logs/inventory/logs
         mkdir -p ./logs/order/logs
-        mkdir -p ./logs/payment
-        mkdir -p ./logs/billing
-        mkdir -p ./logs/delivery
-        mkdir -p ./logs/notification
-        mkdir -p ./logs/notification_bridge
-        mkdir -p ./logs/store_onboarding
-        mkdir -p ./logs/api_gateway
+        mkdir -p ./logs/payment/logs
+        mkdir -p ./logs/billing/logs
+        mkdir -p ./logs/delivery/logs
+        mkdir -p ./logs/notification/logs
+        mkdir -p ./logs/notification_bridge/logs
+        mkdir -p ./logs/store_onboarding/logs
+        mkdir -p ./logs/api_gateway/logs
         
     - name: Start Docker Compose services
       run: docker compose up -d
