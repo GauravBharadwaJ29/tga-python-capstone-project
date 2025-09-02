@@ -52,13 +52,6 @@ jobs:
                 
       kafka:
         image: docker.redpanda.com/redpandadata/redpanda:latest
-        env:
-          REDPANDA_SMP: "1"
-          REDPANDA_RESERVE_MEMORY: "0M"
-          REDPANDA_OVERPROVISIONED: "true"
-          REDPANDA_NODE_ID: "0"
-          REDPANDA_KAFKA_ADDR: "PLAINTEXT://0.0.0.0:9092"
-          REDPANDA_ADVERTISE_KAFKA_ADDR: "PLAINTEXT://localhost:9092"
         ports:
           - 9092:9092
         options: >-
