@@ -55,6 +55,7 @@ jobs:
         env:
           REDPANDA_EMPTY_SEED_START: "true"
           REDPANDA_ENABLE_USAGE_STATS: "false"
+          REDPANDA_DATA_DIRECTORY: "/tmp/redpanda-data"  # Add this line
         ports:
           - 9092:9092
         options: >-
@@ -62,7 +63,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
-          -v /tmp/redpanda-data:/var/lib/redpanda/data
+          -v /tmp/redpanda-data:/tmp/redpanda-data  # Update this line
 
     steps:
     - name: Checkout repository
