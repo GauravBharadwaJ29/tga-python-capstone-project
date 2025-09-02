@@ -82,8 +82,13 @@ jobs:
       run: |
         echo "Listening TCP ports:"
         sudo netstat -tulpn | grep LISTEN || true
-        echo "Check specifically for port 27017:"
-        sudo lsof -i :27017 || echo "No process listening on port 27017"
+        
+        echo "Check ports 5432, 27017, 6379, 9092 specifically:"
+        for port in 5432 27017 6379 9092; do
+          echo "Port $port usage:"
+          sudo lsof -i :$port || echo "Port $port not in use"
+        done
+
         echo "List all running Docker containers:"
         docker ps
 
