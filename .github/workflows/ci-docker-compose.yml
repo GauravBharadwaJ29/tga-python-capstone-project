@@ -78,7 +78,22 @@ jobs:
     #   with:
     #     username: ${{ secrets.DOCKERHUB_USERNAME }}
     #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Diagnostic - Check port 27017 usage and running containers
+      run: |
+        echo "Listening TCP ports:"
+        sudo netstat -tulpn | grep LISTEN || true
+        echo "Check specifically for port 27017:"
+        sudo lsof -i :27017 || echo "No process listening on port 27017"
+        echo "List all running Docker containers:"
+        docker ps
 
+    - name: Cleanup Docker environment
+      run: |
+        echo "Prune unused containers, networks, volumes, images"
+        docker container prune -f
+        docker network prune -f
+        docker volume prune -f
+        docker image prune -f
     - name: Build Docker images
       working-directory: ./
       run: docker compose build
