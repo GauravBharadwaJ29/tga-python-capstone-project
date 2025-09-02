@@ -51,25 +51,27 @@ jobs:
         options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
                 
       kafka:
-        image: confluentinc/cp-kafka:7.6.0
-        env:
-          KAFKA_CLUSTER_ID: "VJ7gkKpd-kqlYxyp4xx8zw"
-          KAFKA_NODE_ID: 1
-          KAFKA_PROCESS_ROLES: broker,controller
-          KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
-          KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
-          KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-          KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-          KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+        image: docker.redpanda.com/redpandadata/redpanda:latest
+        command:
+          - redpanda
+          - start
+          - --smp
+          - '1'
+          - --reserve-memory
+          - 0M
+          - --overprovisioned
+          - --node-id
+          - '0'
+          - --kafka-addr
+          - PLAINTEXT://0.0.0.0:9092
+          - --advertise-kafka-addr
+          - PLAINTEXT://localhost:9092
         ports:
           - 9092:9092
         options: >-
           --health-cmd "nc -z localhost 9092 || exit 1"
-          --health-interval 30s
-          --health-timeout 10s
+          --health-interval 10s
+          --health-timeout 5s
           --health-retries 10
 
 
