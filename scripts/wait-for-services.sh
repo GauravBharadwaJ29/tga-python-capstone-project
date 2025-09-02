@@ -39,3 +39,4 @@ until nc -z kafka 9092; do
 done
 
 echo "All services are up!"
+
